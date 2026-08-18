@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Josefin+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Marcellus&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --obsidian: #0A0A0A;
+  --champagne: #F2F0E4;
+  --charcoal: #141414;
+  --gold: #D4AF37;
+  --gold-light: #F2E8C4;
+  --midnight: #1E3D59;
+  --pewter: #888888;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  background-color: #0A0A0A !important;
+  color: #F2F0E4 !important;
+  scroll-behavior: smooth;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #0A0A0A !important;
+  color: #F2F0E4 !important;
+  font-family: 'Josefin Sans', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: 'Marcellus', 'Italiana', Georgia, serif !important;
+  letter-spacing: 0.15em;
+}
+
+.font-sans {
+  font-family: 'Josefin Sans', sans-serif !important;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #0A0A0A;
+}
+
+/* ── Art Deco Diagonal Crosshatch Background ─────────────────── */
+.bg-artdeco-crosshatch {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(212, 175, 55, 0.04) 0,
+      rgba(212, 175, 55, 0.04) 1px,
+      transparent 0,
+      transparent 50px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(212, 175, 55, 0.04) 0,
+      rgba(212, 175, 55, 0.04) 1px,
+      transparent 0,
+      transparent 50px
+    ) !important;
+}
+
+/* ── Art Deco Radial Sunburst Gradient ────────────────────────── */
+.bg-sunburst {
+  background: radial-gradient(
+    circle at 50% 35%,
+    rgba(212, 175, 55, 0.18) 0%,
+    rgba(10, 10, 10, 0) 70%
+  ) !important;
+}
+
+/* ── Stepped Ziggurat Corner Clip ────────────────────────────── */
+.stepped-corner {
+  clip-path: polygon(
+    12px 0%, 100% 0%, 100% calc(100% - 12px),
+    calc(100% - 12px) 100%, 0% 100%, 0% 12px
+  );
+}
+
+/* ── Double Gold Frame Container ─────────────────────────────── */
+.artdeco-double-border {
+  border: 1px solid rgba(212, 175, 55, 0.5) !important;
+  outline: 1px solid rgba(212, 175, 55, 0.2) !important;
+  outline-offset: 4px;
+}
+
+/* ── Art Deco Input Styling ──────────────────────────────────── */
+.artdeco-input {
+  background: transparent !important;
+  border-bottom: 2px solid #D4AF37 !important;
+  color: #F2F0E4 !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-radius: 0px !important;
+  transition: all 0.3s ease;
+}
+
+.artdeco-input:focus {
+  outline: none !important;
+  border-bottom-color: #F2E8C4 !important;
+  box-shadow: 0 4px 12px -2px rgba(212, 175, 55, 0.4) !important;
+}
+
+.artdeco-input::placeholder {
+  color: #888888 !important;
+  opacity: 0.7;
+}
+
+/* ── Custom Gold Scrollbars ───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #F2E8C4;
+}
+
+/* ── Gold Pulse Animation ─────────────────────────────────────── */
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.55);
+  }
+}
+
+.animate-gold-pulse {
+  animation: goldPulse 3s infinite ease-in-out;
+}
+
+/* ── Direct Fallback Classes ─────────────────────────────────── */
+.shadow-gold {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.25) !important;
+}
+
+.shadow-gold-lg {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.45) !important;
+}
