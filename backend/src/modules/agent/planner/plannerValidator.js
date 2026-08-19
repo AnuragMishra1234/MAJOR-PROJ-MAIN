@@ -61,12 +61,19 @@ export function normalisePlan(raw) {
 
   // ── 1. Parse if string ────────────────────────────────────────────────────
   if (typeof raw === 'string') {
+    // Strip reasoning tags: <think>...</think>
+    let stripped = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
     // Strip markdown code fences: ```json ... ``` or ``` ... ```
-    const stripped = raw
-      .trim()
+    stripped = stripped
       .replace(/^```(?:json)?\s*/i, '')
       .replace(/\s*```\s*$/i, '')
       .trim();
+
+    // Extract first JSON object if surrounded by other text
+    const jsonMatch = stripped.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      stripped = jsonMatch[0];
+    }
 
     try {
       parsed = JSON.parse(stripped);

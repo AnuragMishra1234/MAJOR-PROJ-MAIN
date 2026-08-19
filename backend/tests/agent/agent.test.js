@@ -320,11 +320,15 @@ describe('7. Agent proceeds to next task after completion', () => {
   it('in a chained plan, each task executes in order', async () => {
     const order = [];
     const registry = createHandlerRegistry();
-    for (const type of [TaskType.TEXT_GENERATION, TaskType.WEBSITE_GENERATION, TaskType.VALIDATION]) {
+    for (const [type, output] of [
+      [TaskType.TEXT_GENERATION,    { content: 'mock text content' }],
+      [TaskType.WEBSITE_GENERATION, { files: ['index.html'], content: '<html></html>' }],
+      [TaskType.VALIDATION,         { valid: true }],
+    ]) {
       registry.register(type, {
         async execute(task, _ctx) {
           order.push(task.id);
-          return { success: true, output: { done: task.id } };
+          return { success: true, output };
         },
       });
     }
@@ -550,7 +554,7 @@ describe('13. Dependency-based task chain', () => {
     registry.register(TaskType.WEBSITE_GENERATION, {
       async execute(task, _ctx) {
         timeline.push({ event: 'start', id: task.id });
-        const out = { success: true, output: { files: [] } };
+        const out = { success: true, output: { files: ['index.html'], content: '<html></html>' } };
         timeline.push({ event: 'end', id: task.id });
         return out;
       },
@@ -604,7 +608,7 @@ describe('14. Context passing between tasks', () => {
     registry.register(TaskType.WEBSITE_GENERATION, {
       async execute(_task, ctx) {
         task2Context = ctx;           // Capture the context
-        return { success: true, output: { files: ['index.html'] } };
+        return { success: true, output: { files: ['index.html'], content: '<html></html>' } };
       },
     });
 
@@ -643,15 +647,15 @@ describe('14. Context passing between tasks', () => {
     const capturedContexts = {};
     const registry = createHandlerRegistry();
 
-    for (const [type, id] of [
-      [TaskType.TEXT_GENERATION, 'task-1'],
-      [TaskType.WEBSITE_GENERATION, 'task-2'],
-      [TaskType.VALIDATION, 'task-3'],
+    for (const [type, mockOutput] of [
+      [TaskType.TEXT_GENERATION,    { content: 'mock text' }],
+      [TaskType.WEBSITE_GENERATION, { files: ['index.html'], content: '<html></html>' }],
+      [TaskType.VALIDATION,         { valid: true }],
     ]) {
       registry.register(type, {
         async execute(task, ctx) {
           capturedContexts[task.id] = { ...ctx.outputs };
-          return { success: true, output: { done: task.id } };
+          return { success: true, output: mockOutput };
         },
       });
     }

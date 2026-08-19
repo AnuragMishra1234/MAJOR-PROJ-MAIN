@@ -1,6 +1,7 @@
-const textGenerator = require('./textGenerator');
-const codeGenerator = require('./codeGenerator');
-const visionOCR = require('./visionOCR');
+const textGenerator = require('../text/textGenerator');
+const codeGenerator = require('../code/codeGenerator');
+const visionOCR = require('../vision/visionOCR');
+const websiteGenerator = require('../website/websiteGenerator');
 
 async function runTask(type, params = {}) {
   switch (type) {
@@ -20,6 +21,14 @@ async function runTask(type, params = {}) {
       }
       return await codeGenerator.generate(params.goal, params.language, params.context);
 
+    case 'website':
+      if (!params.goal) {
+        const error = new Error('Goal is required for website generation');
+        error.status = 400;
+        throw error;
+      }
+      return await websiteGenerator.generate(params.goal, params.context);
+
     case 'vision': {
       const input = params.imagePathOrUrl || params.imageUrl || params.image;
       if (!input) {
@@ -35,6 +44,9 @@ async function runTask(type, params = {}) {
         const error = new Error('Goal, previousOutput, and errorMessage are required for repair');
         error.status = 400;
         throw error;
+      }
+      if (params.taskType === 'WEBSITE_GENERATION' || (params.previousOutput && (params.previousOutput.includes('<html') || params.previousOutput.includes('<!DOCTYPE')))) {
+        return await websiteGenerator.repair(params.goal, params.previousOutput, params.errorMessage, params.context);
       }
       return await textGenerator.repair(params.goal, params.previousOutput, params.errorMessage, params.context);
 

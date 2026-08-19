@@ -1,126 +1,201 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import DecoButton from '../ui/DecoButton';
 import DiamondIcon from '../ui/DiamondIcon';
 import GoldDivider from '../ui/GoldDivider';
 
 /**
  * Landing Page Section I — HERO
+ *
+ * Communicates the specific 6-phase pipeline this platform runs:
+ * Agent → Planner → Workflow → Generation → Execution → Validation
+ * (→ Auto-Healing in Phase 8)
  */
 export default function Hero({ onNavigate }) {
   const [activeStep, setActiveStep] = useState(0);
 
-  const workflowSteps = [
-    { label: 'IDEA', numeral: 'I', desc: 'Raw Human Intent' },
-    { label: 'AGENT', numeral: 'II', desc: 'Cognitive Parsing' },
-    { label: 'PLAN', numeral: 'III', desc: 'DAG Task Breakdown' },
-    { label: 'GENERATE', numeral: 'IV', desc: 'Multi-Asset Output' },
-    { label: 'VALIDATE', numeral: 'V', desc: 'AST & Runtime Checks' },
-    { label: 'HEAL', numeral: 'VI', desc: 'Self-Patching Loop' },
-    { label: 'RESULT', numeral: 'VII', desc: 'Verified Deployment' },
+  const pipeline = [
+    {
+      numeral: 'I',
+      label: 'AGENT',
+      desc: 'Receives your goal and coordinates the entire workflow — no manual task management.',
+    },
+    {
+      numeral: 'II',
+      label: 'PLANNER',
+      desc: 'Breaks your goal into a structured task graph. Every dependency resolved automatically.',
+    },
+    {
+      numeral: 'III',
+      label: 'WORKFLOW ENGINE',
+      desc: 'Runs tasks in the correct order, tracks state, and manages failures cleanly.',
+    },
+    {
+      numeral: 'IV',
+      label: 'AI GENERATION',
+      desc: 'Generates text, code, and websites using the leading language models.',
+    },
+    {
+      numeral: 'V',
+      label: 'EXECUTION',
+      desc: 'Runs generated code in a safe sandbox and captures structured results.',
+    },
+    {
+      numeral: 'VI',
+      label: 'VALIDATION',
+      desc: 'Every output is checked for correctness, completeness, and quality — automatically.',
+    },
   ];
 
   return (
     <section className="relative py-24 md:py-36 px-6 bg-sunburst border-b border-[#D4AF37]/30 overflow-hidden">
-      <div className="max-w-5xl mx-auto text-center relative z-10">
-        {/* Roman Numeral Accent */}
-        <div className="inline-flex items-center gap-4 px-6 py-2 border border-[#D4AF37]/40 bg-[#141414] mb-8 shadow-gold">
-          <span className="w-2 h-2 bg-[#D4AF37] rotate-45" />
-          <span className="font-sans text-xs tracking-[0.35em] uppercase text-[#D4AF37]">
-            ROMAN NUMERAL I — WORKFLOW ORCHESTRATION
-          </span>
-          <span className="w-2 h-2 bg-[#D4AF37] rotate-45" />
-        </div>
 
-        {/* Main Heading */}
-        <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl uppercase tracking-[0.25em] text-[#F2F0E4] leading-[1.1] mb-8">
-          GENERATIVE AI <br />
-          <span className="text-[#D4AF37] drop-shadow-[0_0_25px_rgba(212,175,55,0.4)]">
-            FOR EVERYONE
+      {/* Background crosshatch accent */}
+      <div className="absolute inset-0 bg-artdeco-crosshatch opacity-50 pointer-events-none" />
+
+      <div className="max-w-5xl mx-auto text-center relative z-10">
+
+        {/* Eyebrow badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-4 px-6 py-2.5 border border-[#D4AF37]/40 bg-[#141414] mb-10 shadow-gold"
+        >
+          <span className="w-1.5 h-1.5 bg-[#D4AF37] rotate-45 shrink-0" />
+          <span className="font-sans text-[11px] tracking-[0.35em] uppercase text-[#D4AF37]">
+            AUTONOMOUS AGENTIC AI PLATFORM
           </span>
-        </h1>
+          <span className="w-1.5 h-1.5 bg-[#D4AF37] rotate-45 shrink-0" />
+        </motion.div>
+
+        {/* Main headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.08 }}
+          className="font-display text-5xl sm:text-7xl lg:text-8xl uppercase tracking-[0.2em] text-[#F2F0E4] leading-[1.1] mb-8"
+        >
+          FROM IDEA
+          <br />
+          <span className="text-[#D4AF37] drop-shadow-[0_0_25px_rgba(212,175,55,0.35)]">
+            TO OUTPUT.
+          </span>
+        </motion.h1>
 
         <GoldDivider />
 
-        {/* Supporting Copy */}
-        <p className="font-sans text-lg sm:text-xl text-[#888888] max-w-3xl mx-auto leading-relaxed mb-12 tracking-wide">
-          Turn a high-level idea into a coordinated workflow of AI-generated, validated and refined outputs. Give AI the goal. Let AI handle the workflow.
-        </p>
+        {/* Supporting copy */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="font-sans text-base sm:text-lg text-[#888888] max-w-2xl mx-auto leading-relaxed mb-4 tracking-wide"
+        >
+          Let AI plan, generate, execute, and validate — automatically.
+          You give the goal. The agent handles the rest.
+        </motion.p>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mb-20">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.28 }}
+          className="font-sans text-sm text-[#888888]/60 max-w-xl mx-auto leading-relaxed mb-12 tracking-wide"
+        >
+          Agent → Planner → Workflow → AI Generation → Execution → Validation
+        </motion.p>
+
+        {/* CTA buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.35 }}
+          className="flex flex-wrap items-center justify-center gap-5 mb-20"
+        >
           <DecoButton
             variant="primary"
             onClick={() => onNavigate('workspace')}
             className="h-14 px-10 text-xs"
           >
-            CREATE A PROJECT ↗
+            START A PROJECT ↗
           </DecoButton>
           <a href="#architecture">
             <DecoButton variant="secondary" className="h-14 px-10 text-xs">
-              EXPLORE THE WORKFLOW
+              SEE HOW IT WORKS
             </DecoButton>
           </a>
-        </div>
+        </motion.div>
 
-        {/* Interactive Art Deco Workflow Visual */}
-        <div className="border-2 border-[#D4AF37]/40 p-2 bg-[#0A0A0A] shadow-gold-lg">
-          <div className="border border-[#D4AF37]/20 bg-[#141414] p-6 md:p-10 relative">
-            <p className="font-sans text-xs tracking-[0.3em] uppercase text-[#D4AF37] mb-6">
-              THE AUTONOMOUS WORKFLOW MATRIX
+        {/* ── Interactive Pipeline Visual ──────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.45 }}
+          className="border-2 border-[#D4AF37]/40 p-2 bg-[#0A0A0A] shadow-gold-lg"
+        >
+          <div className="border border-[#D4AF37]/20 bg-[#141414] p-6 md:p-8">
+            <p className="font-sans text-[11px] tracking-[0.35em] uppercase text-[#D4AF37] mb-6">
+              THE ORCHESTRATION PIPELINE — CLICK A STAGE
             </p>
 
-            {/* Stepped Workflow Pipeline */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-8">
-              {workflowSteps.map((step, idx) => (
+            {/* Stage selector grid */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-6">
+              {pipeline.map((step, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveStep(idx)}
-                  className={`p-4 border transition-all duration-300 flex flex-col items-center justify-center text-center ${
+                  className={`p-3 border transition-all duration-300 flex flex-col items-center text-center ${
                     activeStep === idx
-                      ? 'border-[#D4AF37] bg-[#1E3D59]/40 shadow-gold scale-105'
-                      : 'border-[#D4AF37]/20 bg-[#0A0A0A] hover:border-[#D4AF37]/60'
+                      ? 'border-[#D4AF37] bg-[#1E3D59]/30 shadow-gold scale-105'
+                      : 'border-[#D4AF37]/20 bg-[#0A0A0A] hover:border-[#D4AF37]/50'
                   }`}
                 >
-                  <span className="font-display text-xs text-[#D4AF37] mb-1 tracking-widest">
+                  <span className="font-display text-[11px] text-[#D4AF37] mb-1 tracking-widest">
                     {step.numeral}
                   </span>
-                  <span className="font-display text-sm tracking-wider text-[#F2F0E4] font-bold">
+                  <span className="font-display text-[11px] tracking-wider text-[#F2F0E4] font-bold leading-tight">
                     {step.label}
                   </span>
                 </button>
               ))}
             </div>
 
-            {/* Step Detail Card */}
-            <div className="bg-[#0A0A0A] border border-[#D4AF37]/30 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4 text-left">
-                <DiamondIcon size="md">✦</DiamondIcon>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-sans text-xs tracking-widest text-[#D4AF37]">
-                      STAGE {workflowSteps[activeStep].numeral}
-                    </span>
-                    <span className="text-[#888888] text-xs">•</span>
-                    <span className="font-display text-lg text-[#F2F0E4] uppercase tracking-wider">
-                      {workflowSteps[activeStep].label} PROTOCOL
-                    </span>
-                  </div>
-                  <p className="font-sans text-sm text-[#888888] mt-1">
-                    {workflowSteps[activeStep].desc} — Autonomous orchestration loop.
-                  </p>
-                </div>
-              </div>
-
-              <DecoButton
-                variant="ghost"
-                onClick={() => onNavigate('workspace')}
-                className="text-[11px] h-10 px-4 whitespace-nowrap"
+            {/* Active step detail */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
+                className="bg-[#0A0A0A] border border-[#D4AF37]/25 p-6 flex flex-col sm:flex-row items-center justify-between gap-6"
               >
-                SIMULATE IN WORKSPACE ↗
-              </DecoButton>
-            </div>
+                <div className="flex items-center gap-4 text-left">
+                  <DiamondIcon size="md">
+                    <span className="font-display text-sm">{pipeline[activeStep].numeral}</span>
+                  </DiamondIcon>
+                  <div>
+                    <p className="font-sans text-[10px] tracking-[0.3em] uppercase text-[#D4AF37] mb-1">
+                      STAGE {pipeline[activeStep].numeral} — {pipeline[activeStep].label}
+                    </p>
+                    <p className="font-sans text-sm text-[#F2F0E4]/80 leading-relaxed max-w-md">
+                      {pipeline[activeStep].desc}
+                    </p>
+                  </div>
+                </div>
+
+                <DecoButton
+                  variant="ghost"
+                  onClick={() => onNavigate('workspace')}
+                  className="text-[11px] h-10 px-5 whitespace-nowrap shrink-0"
+                >
+                  TRY IT ↗
+                </DecoButton>
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
+
       </div>
     </section>
   );

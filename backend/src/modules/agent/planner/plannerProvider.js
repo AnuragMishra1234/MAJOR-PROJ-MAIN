@@ -71,7 +71,7 @@ export class GroqProvider {
 
   constructor() {
     this.#apiKey = process.env.GROQ_API_KEY ?? '';
-    this.#model = process.env.PLANNER_MODEL ?? 'llama-3.3-70b-versatile';
+    this.#model = process.env.PLANNER_MODEL ?? 'qwen/qwen3.6-27b';
     this.#baseUrl = 'https://api.groq.com/openai/v1';
   }
 
@@ -102,56 +102,85 @@ export class GroqProvider {
       response_format: { type: 'json_object' }, // Groq JSON mode
     };
 
-    let response;
-    try {
-      response = await fetch(`${this.#baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.#apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-    } catch (networkErr) {
-      throw new ProviderError(
-        `Groq API network error: ${networkErr.message}`,
-        'groq',
-        { originalError: networkErr.message },
-      );
-    }
+    const maxRetries = 3;
+    let lastErr = null;
 
-    if (!response.ok) {
-      let errorBody = '';
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      let response;
       try {
-        errorBody = await response.text();
-      } catch (_) { /* ignore */ }
-      throw new ProviderError(
-        `Groq API returned HTTP ${response.status}: ${errorBody}`,
-        'groq',
-        { status: response.status, body: errorBody },
-      );
+        response = await fetch(`${this.#baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.#apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (networkErr) {
+        lastErr = networkErr;
+        if (attempt < maxRetries) {
+          await new Promise((r) => setTimeout(r, 2000));
+          continue;
+        }
+        throw new ProviderError(
+          `Groq API network error: ${networkErr.message}`,
+          'groq',
+          { originalError: networkErr.message },
+        );
+      }
+
+      if (!response.ok) {
+        let errorBody = '';
+        try {
+          errorBody = await response.text();
+        } catch (_) { /* ignore */ }
+
+        const isRateLimit = response.status === 429 || /rate limit|tpm|tokens per minute/i.test(errorBody);
+        if (isRateLimit && attempt < maxRetries) {
+          let delayMs = 3500;
+          const match = errorBody.match(/try again in ([0-9.]+)s/i);
+          if (match && match[1]) {
+            const sec = parseFloat(match[1]);
+            if (!isNaN(sec) && sec > 0) delayMs = Math.ceil(sec * 1000) + 600;
+          }
+          console.log(`[PLANNER] Groq rate limit hit. Auto-waiting ${(delayMs / 1000).toFixed(1)}s before retry (${attempt + 1}/${maxRetries})...`);
+          await new Promise((r) => setTimeout(r, delayMs));
+          continue;
+        }
+
+        throw new ProviderError(
+          `Groq API returned HTTP ${response.status}: ${errorBody}`,
+          'groq',
+          { status: response.status, body: errorBody },
+        );
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseErr) {
+        throw new ProviderError(
+          `Failed to parse Groq API response as JSON: ${parseErr.message}`,
+          'groq',
+        );
+      }
+
+      const content = data?.choices?.[0]?.message?.content;
+      if (typeof content !== 'string') {
+        throw new ProviderError(
+          'Groq API response did not contain a valid content string.',
+          'groq',
+          { response: data },
+        );
+      }
+
+      return { content };
     }
 
-    let data;
-    try {
-      data = await response.json();
-    } catch (parseErr) {
-      throw new ProviderError(
-        `Failed to parse Groq API response as JSON: ${parseErr.message}`,
-        'groq',
-      );
-    }
-
-    const content = data?.choices?.[0]?.message?.content;
-    if (typeof content !== 'string') {
-      throw new ProviderError(
-        'Groq API response did not contain a valid content string.',
-        'groq',
-        { response: data },
-      );
-    }
-
-    return { content };
+    throw new ProviderError(
+      lastErr?.message || 'Max retries exceeded for Groq API call',
+      'groq',
+    );
   }
 }
 
