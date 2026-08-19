@@ -282,7 +282,7 @@ cp .env.example .env
 ```env
 PORT=5000
 NODE_ENV=development
-MONGO_URI=mongodb+srv://youruser:yourpassword@cluster0.abc123.mongodb.net/?appName=Cluster0
+MONGO_URI=put_ur_mongodb_urv:)
 JWT_SECRET=your-very-long-random-secret-here-at-least-32-chars
 JWT_EXPIRE=7d
 GROQ_API_KEY=gsk_yourkeyhere
