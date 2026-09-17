@@ -67,6 +67,29 @@ export function AuthProvider({ children }) {
     setError(null);
   }, []);
 
+  const updateProfile = useCallback(async (profileData) => {
+    setError(null);
+    try {
+      const updatedUser = await authService.updateProfile(profileData);
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
+  const updatePassword = useCallback(async (currentPassword, newPassword) => {
+    setError(null);
+    try {
+      const result = await authService.updatePassword(currentPassword, newPassword);
+      return result;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
   const value = {
     user,
     isAuthenticated: !!user,
@@ -75,6 +98,8 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    updateProfile,
+    updatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,16 +1,24 @@
 import express from 'express';
-import { register, login, getMe } from '../controllers/authController.js';
+import {
+  register,
+  login,
+  getMe,
+  updateProfile,
+  updatePassword,
+  getProfileStats,
+} from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// POST /api/auth/register
+// Public routes
 router.post('/register', register);
-
-// POST /api/auth/login
 router.post('/login', login);
 
-// GET /api/auth/me   (requires valid JWT)
+// Protected profile & user routes
 router.get('/me', protect, getMe);
+router.put('/profile', protect, updateProfile);
+router.put('/password', protect, updatePassword);
+router.get('/stats', protect, getProfileStats);
 
 export default router;

@@ -51,6 +51,11 @@ export default function Footer({ onNavigate }) {
                   Project Log History
                 </button>
               </li>
+              <li>
+                <button onClick={() => onNavigate('profile')} className="hover:text-[#D4AF37] transition-colors">
+                  Operator Profile & Settings
+                </button>
+              </li>
             </ul>
           </div>
 

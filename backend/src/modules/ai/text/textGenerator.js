@@ -84,15 +84,59 @@ async function callGroq(messages, model, temperature = 0.7, maxRetries = 3) {
   throw error;
 }
 
+const TEXT_SYSTEM_PROMPT = `You are an elite technical strategist, principal systems architect, and executive copywriter.
+Generate thorough, in-depth, production-ready, beautifully structured Markdown content tailored to the user's exact goal.
+
+REQUIREMENTS:
+1. Provide comprehensive, concrete, real-world content with rich detail, structured sections, realistic examples, specifications, and actionable depth.
+2. Structure with clear Markdown hierarchy (# Title, ## Executive Summary, ## Technical Architecture / Specifications, ## Core Requirements & Implementation, ## Best Practices & Metrics, ## Action Plan).
+3. Use realistic industry data, concrete parameters, real APIs, and accurate domain terminology.
+4. STRICTLY PROHIBITED: Do not use placeholder phrases (no "lorem ipsum", no "TBD", no "insert here", no "add details later"). Deliver complete, publication-ready work.`;
+
+function stripThinking(text) {
+  if (typeof text !== 'string') return '';
+  return text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+}
+
 async function generate(goal, context = '') {
   const startTime = Date.now();
-  const model = process.env.TEXT_MODEL || 'qwen/qwen3.6-27b';
+  const model = process.env.TEXT_MODEL || 'openai/gpt-oss-20b';
+
+  if (!process.env.GROQ_API_KEY) {
+    const mockContent = `# Strategic Specification: ${goal}
+
+## 1. Executive Summary
+This document defines the comprehensive architecture, operational requirements, and implementation specifications for "${goal}". Designed for high scalability and enterprise reliability.
+
+## 2. Core Functional Requirements
+- **High Throughput Execution:** Sub-second response latency with automated error boundary recovery.
+- **Robust Data Pipeline:** Strict validation, schema enforcement, and telemetry tracking.
+- **Resilient AI Orchestration:** Automated backoff, model failover, and self-healing error correction.
+
+## 3. Architecture & Key Milestones
+1. **Phase 1: Ingestion & Validation:** Schema parsing and prompt sanitization.
+2. **Phase 2: Execution Engine:** Multi-stage task execution with real-time SSE streaming.
+3. **Phase 3: Automated Quality Assurance:** Semantic relevance verification and compliance checks.
+
+## 4. Operational Best Practices
+- Strict type safety and input sanitization across all public endpoints.
+- Real-time monitoring with automated healing on transient rate limits.
+- Complete audit trail persistence in high-availability datastore.`;
+
+    return {
+      content: mockContent,
+      model: 'mock-text',
+      latencyMs: Date.now() - startTime,
+    };
+  }
+
   const messages = [
-    { role: 'system', content: 'You are a professional content creator.' },
-    { role: 'user', content: `Goal: ${goal}\nContext: ${context}` },
+    { role: 'system', content: TEXT_SYSTEM_PROMPT },
+    { role: 'user', content: `GOAL:\n${goal}\n\n${context ? `CONTEXT FROM PREVIOUS TASKS:\n${context}\n\n` : ''}Generate the complete, in-depth specification/content now:` },
   ];
 
-  const content = await callGroq(messages, model, 0.7);
+  const raw = await callGroq(messages, model, 0.7);
+  const content = stripThinking(raw);
   return {
     content,
     model,
@@ -102,15 +146,26 @@ async function generate(goal, context = '') {
 
 async function repair(goal, previousOutput, errorMessage, context = '') {
   const startTime = Date.now();
-  const model = process.env.TEXT_MODEL || 'qwen/qwen3.6-27b';
-  const repairContext = `${context ? `Context: ${context}\n` : ''}Previous Output:\n${previousOutput}\n\nError Encountered:\n${errorMessage}\n\nPlease fix the error and return only the corrected result.`;
+  const model = process.env.TEXT_MODEL || 'openai/gpt-oss-20b';
+
+  if (!process.env.GROQ_API_KEY) {
+    return {
+      content: `# Corrected Specification: ${goal}\n\n## Resolution of Error\nFixed issue: ${errorMessage}\n\n## Validated Output\nComplete, verified content successfully generated.`,
+      model: 'mock-text',
+      latencyMs: Date.now() - startTime,
+      _healed: true,
+    };
+  }
+
+  const repairContext = `${context ? `Context: ${context}\n` : ''}Previous Output (Snippet):\n${previousOutput}\n\nError Encountered:\n${errorMessage}\n\nPlease fix the error, eliminate any placeholders or omissions, and return the complete, polished Markdown result.`;
 
   const messages = [
-    { role: 'system', content: 'You are a professional content creator.' },
-    { role: 'user', content: `Goal: ${goal}\n${repairContext}` },
+    { role: 'system', content: TEXT_SYSTEM_PROMPT },
+    { role: 'user', content: `GOAL:\n${goal}\n\n${repairContext}` },
   ];
 
-  const content = await callGroq(messages, model, 0.7);
+  const raw = await callGroq(messages, model, 0.7);
+  const content = stripThinking(raw);
   return {
     content,
     model,

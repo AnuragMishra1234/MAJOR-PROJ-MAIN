@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import WorkspacePage from './pages/WorkspacePage';
 import HistoryPage from './pages/HistoryPage';
+import ProfilePage from './pages/ProfilePage';
 
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
@@ -26,7 +27,7 @@ export default function App() {
 
   /**
    * Navigate to a page, optionally passing state context.
-   * @param {string} page  - One of: 'landing' | 'login' | 'register' | 'dashboard' | 'workspace' | 'history'
+   * @param {string} page  - One of: 'landing' | 'login' | 'register' | 'dashboard' | 'workspace' | 'history' | 'profile'
    * @param {object} state - Optional context (e.g. { projectId, projectTitle, goal })
    */
   const handleNavigate = (page, state = {}) => {
@@ -48,6 +49,7 @@ export default function App() {
             {activePage === 'dashboard' && <DashboardPage onNavigate={handleNavigate} />}
             {activePage === 'workspace' && <WorkspacePage onNavigate={handleNavigate} navState={navState} />}
             {activePage === 'history'   && <HistoryPage   onNavigate={handleNavigate} navState={navState} />}
+            {activePage === 'profile'   && <ProfilePage   onNavigate={handleNavigate} />}
           </ErrorBoundary>
         </main>
 

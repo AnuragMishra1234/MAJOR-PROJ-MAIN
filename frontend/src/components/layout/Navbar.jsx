@@ -26,6 +26,7 @@ export default function Navbar({ activePage = 'landing', onNavigate }) {
     { id: 'dashboard', label: 'DASHBOARD' },
     { id: 'workspace', label: 'WORKSPACE' },
     { id: 'history',   label: 'HISTORY'   },
+    ...(isAuthenticated ? [{ id: 'profile', label: 'PROFILE' }] : []),
   ];
 
   const handleNav = (page) => {
@@ -83,10 +84,18 @@ export default function Navbar({ activePage = 'landing', onNavigate }) {
 
           {isAuthenticated ? (
             <>
-              <div className="flex items-center gap-2 font-sans text-xs text-[#F2F0E4]/60 tracking-wider">
-                <User size={11} className="text-[#D4AF37]" />
-                <span className="text-[#D4AF37] font-bold uppercase">{user?.name?.split(' ')[0] || 'USER'}</span>
-              </div>
+              <button
+                onClick={() => handleNav('profile')}
+                className={`flex items-center gap-2 font-sans text-xs tracking-wider px-2.5 py-1 border transition-all ${
+                  activePage === 'profile'
+                    ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#D4AF37]'
+                    : 'border-[#D4AF37]/20 hover:border-[#D4AF37] text-[#F2F0E4]/80'
+                }`}
+                title="View Operator Profile & Settings"
+              >
+                <User size={12} className="text-[#D4AF37]" />
+                <span className="text-[#D4AF37] font-bold uppercase">{user?.name?.split(' ')[0] || 'PROFILE'}</span>
+              </button>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1.5 font-sans text-xs tracking-[0.2em] uppercase text-[#888888] hover:text-[#EF5350] transition-colors"

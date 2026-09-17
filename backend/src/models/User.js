@@ -23,6 +23,25 @@ const userSchema = new mongoose.Schema(
       minlength: [6, 'Password must be at least 6 characters'],
       select: false, // Never return password in queries by default
     },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [300, 'Bio cannot exceed 300 characters'],
+      default: 'Generative AI Developer & Prompt Engineer',
+    },
+    role: {
+      type: String,
+      trim: true,
+      default: 'Full Stack AI Engineer',
+    },
+    preferredModel: {
+      type: String,
+      default: 'openai/gpt-oss-20b',
+    },
+    avatarColor: {
+      type: String,
+      default: '#D4AF37',
+    },
   },
   { timestamps: true }
 );
