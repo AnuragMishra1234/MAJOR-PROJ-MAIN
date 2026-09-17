@@ -133,7 +133,38 @@ ABSOLUTE REQUIREMENTS:
    - NO "lorem ipsum", NO "your name here", NO "add your content", NO "fill in with", NO "ready-to-use template", NO "coming soon".
    - NO markdown fences (like \`\`\`html) or conversational commentary. Return pure HTML.`;
 
-  const userPrompt = `GOAL:\n${goal}\n\n${context ? `CONTEXT FROM PRIOR TASKS:\n${context}\n\n` : ''}Build the complete website now:`;
+  // Extract key requested elements to provide an explicit requirement checklist
+  const requestedSections = [];
+  if (/\b(?:hero|banner|headline)\b/i.test(goal)) requestedSections.push('Hero section with tagline and call-to-action');
+  if (/\b(?:highlights?|key events?|event highlights)\b/i.test(goal)) requestedSections.push('Event Highlights / Key Highlights');
+  if (/\b(?:schedule|agenda|timeline|program)\b/i.test(goal)) requestedSections.push('Schedule / Agenda timeline');
+  if (/\b(?:speakers?|presenters?|keynotes?)\b/i.test(goal)) requestedSections.push('Speakers / Presenters list');
+  if (/\b(?:regist(?:er|ration)|sign\s*up|rsvp|tickets?)\b/i.test(goal)) requestedSections.push('Interactive Registration form with input fields');
+  if (/\b(?:faq|frequently\s*asked|q\s*&\s*a)\b/i.test(goal)) requestedSections.push('FAQ accordion / Q&A section');
+  if (/\b(?:pricing|plans?|tiers?)\b/i.test(goal)) requestedSections.push('Pricing tiers / comparison cards');
+  if (/\b(?:testimonials?|reviews?|feedback)\b/i.test(goal)) requestedSections.push('Testimonials / Reviews carousel or grid');
+  if (/\b(?:features?|capabilities)\b/i.test(goal)) requestedSections.push('Feature cards / Key Capabilities');
+  if (/\b(?:about(?:\s+us)?|bio|background)\b/i.test(goal)) requestedSections.push('About section with story/bio');
+  if (/\b(?:skills?|technologies|tech\s*stack)\b/i.test(goal)) requestedSections.push('Technical Skills badge grid');
+  if (/\b(?:projects?|portfolio|work)\b/i.test(goal)) requestedSections.push('Project cards with descriptions and tech tags');
+  if (/\b(?:education|academic|degrees?)\b/i.test(goal)) requestedSections.push('Education & Qualifications timeline');
+  if (/\b(?:menu|dishes|food|courses)\b/i.test(goal)) requestedSections.push('Curated Menu with categories, items, and pricing');
+  if (/\b(?:reservation|booking)\b/i.test(goal)) requestedSections.push('Reservation booking form');
+  if (/\b(?:contact|get\s*in\s*touch|reach\s*out)\b/i.test(goal)) requestedSections.push('Contact section with form and info');
+  if (/\b(?:footer)\b/i.test(goal)) requestedSections.push('Footer with quick links and copyright');
+
+  const reqChecklist = [];
+  if (requestedSections.length > 0) {
+    reqChecklist.push(`MANDATORY SECTIONS TO INCLUDE:\n${requestedSections.map(s => `- ${s}`).join('\n')}`);
+  }
+  if (/\b(?:dark|night|black|luxury dark)\b/i.test(goal)) {
+    reqChecklist.push('STYLING: Premium dark theme (#0a0a0a - #1a1a1a backgrounds, high-contrast text, modern accents)');
+  }
+  if (/\b(?:responsive|mobile-friendly)\b/i.test(goal)) {
+    reqChecklist.push('LAYOUT: Fully responsive with @media queries for mobile, tablet, and desktop');
+  }
+
+  const userPrompt = `GOAL:\n${goal}\n\n${reqChecklist.length > 0 ? `${reqChecklist.join('\n\n')}\n\n` : ''}${context ? `CONTEXT FROM PRIOR TASKS:\n${context}\n\n` : ''}Build the complete standalone HTML website now:`;
 
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -178,15 +209,20 @@ Fix the errors in the previously generated website and return the corrected, com
 ABSOLUTE REQUIREMENTS:
 1. Output ONLY pure HTML code starting with <!DOCTYPE html> and ending with </html>.
 2. Fix all reported issues: ${errorMessage}.
-3. Ensure every section has rich, complete, realistic content matching the goal with NO placeholder language.`;
+3. Preserve all existing valid components, styles, and content while specifically resolving the reported error.
+4. Ensure every section has rich, complete, realistic content matching the goal with NO placeholder language.`;
+
+  const prevHtml = typeof previousOutput === 'string'
+    ? previousOutput
+    : (previousOutput?.content || '');
 
   const userPrompt = `GOAL: ${goal}
 ERROR TO FIX: ${errorMessage}
 ${context ? `CONTEXT: ${context}\n` : ''}
-PREVIOUS INCOMPLETE OUTPUT (SNIPPET):
-${typeof previousOutput === 'string' ? previousOutput.slice(0, 1500) : ''}
+PREVIOUS OUTPUT TO REPAIR (UP TO 5000 CHARACTERS):
+${prevHtml.slice(0, 5000)}
 
-Generate the complete fixed HTML website now:`;
+Perform a targeted fix to resolve the error. Return the complete updated HTML website now:`;
 
   const messages = [
     { role: 'system', content: systemPrompt },

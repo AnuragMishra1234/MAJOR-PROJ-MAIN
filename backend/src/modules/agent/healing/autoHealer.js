@@ -62,9 +62,9 @@ function canHeal(failureInfo, taskType) {
 
 function extractPreviousOutputString(prev) {
   if (!prev || typeof prev !== 'object') return '';
-  if (typeof prev.content === 'string') return prev.content.substring(0, 1000);
-  if (typeof prev.code === 'string') return prev.code.substring(0, 1000);
-  try { return JSON.stringify(prev).substring(0, 1000); } catch { return ''; }
+  if (typeof prev.content === 'string') return prev.content.substring(0, 5000);
+  if (typeof prev.code === 'string') return prev.code.substring(0, 5000);
+  try { return JSON.stringify(prev).substring(0, 5000); } catch { return ''; }
 }
 
 function normalizeRepairOutput(result, taskType) {
@@ -106,7 +106,12 @@ class AutoHealer {
    */
   async heal({ task, failureInfo, previousOutput, executionContext }) {
     const taskType = task?.type || 'UNKNOWN';
-    const goal     = task?.description || task?.title || executionContext?.goal || '';
+    // Use the original user workflow goal first — it carries the full intent.
+    // Fall back to task description/title only if executionContext.goal is absent.
+    const goal = executionContext?.goal
+      || task?.description
+      || task?.title
+      || '';
 
     const { canHeal: eligible, reason } = canHeal(failureInfo, taskType);
     if (!eligible) {

@@ -20,6 +20,7 @@ async function callGroq(messages, model, temperature = 0.7, maxRetries = 3) {
   const url = process.env.GROQ_URL || 'https://api.groq.com/openai/v1/chat/completions';
   const apiKey = process.env.GROQ_API_KEY;
   const primaryModel = model || process.env.TEXT_MODEL || 'openai/gpt-oss-20b';
+  const fallbackModel = process.env.FALLBACK_MODEL || 'qwen/qwen3.8-27b';
 
   if (!apiKey) {
     const error = new Error('GROQ_API_KEY is not configured');
@@ -59,14 +60,16 @@ async function callGroq(messages, model, temperature = 0.7, maxRetries = 3) {
 
       if (isRateLimit && attempt < maxRetries) {
         const delayMs = extractRetryDelayMs(errorMsg);
-        console.log(`[GROQ_BACKOFF] Rate limit encountered. Auto-waiting ${(delayMs / 1000).toFixed(1)}s before retry (attempt ${attempt + 1}/${maxRetries})...`);
+        console.log(`[GROQ_BACKOFF] Rate limit encountered for model "${currentModel}". Auto-waiting ${(delayMs / 1000).toFixed(1)}s before retry (attempt ${attempt + 1}/${maxRetries})...`);
         await sleep(delayMs);
 
-        // On attempt 2+, try alternate lightweight model if primary is heavily congested
-        if (attempt >= 2 && currentModel === 'qwen/qwen3.6-27b') {
-          currentModel = 'openai/gpt-oss-20b';
-        } else if (attempt >= 2 && currentModel === 'openai/gpt-oss-20b') {
-          currentModel = 'qwen/qwen3.6-27b';
+        // On attempt 2+, switch to accessible fallback model if primary is congested
+        if (attempt >= 2 && currentModel === primaryModel) {
+          currentModel = fallbackModel;
+          console.log(`[GROQ_BACKOFF] Switching to fallback model: ${currentModel}`);
+        } else if (attempt >= 2 && currentModel === fallbackModel) {
+          currentModel = primaryModel;
+          console.log(`[GROQ_BACKOFF] Switching back to primary model: ${currentModel}`);
         }
         continue;
       }

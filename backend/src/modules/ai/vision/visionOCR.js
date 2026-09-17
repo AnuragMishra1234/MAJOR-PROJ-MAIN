@@ -12,7 +12,7 @@ async function extractText(imageInput) {
 
     const apiKey = process.env.GROQ_API_KEY;
     const groqUrl = process.env.GROQ_URL || 'https://api.groq.com/openai/v1/chat/completions';
-    const model = process.env.VISION_MODEL || 'qwen/qwen3.6-27b';
+    const model = process.env.VISION_MODEL || 'qwen/qwen3.8-27b';
 
     if (!apiKey) {
       throw new Error('GROQ_API_KEY is missing in environment variables');

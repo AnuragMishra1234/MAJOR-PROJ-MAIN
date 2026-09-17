@@ -114,12 +114,19 @@ export function buildContextString(executionContext, task) {
     // Pull meaningful fields; skip metadata/internal fields
     const content = output?.content ?? output?.code ?? output?.result ?? output?.text;
     if (content && typeof content === 'string') {
-      priorParts.push(`[${taskId}] ${content.substring(0, 400)}`);
+      priorParts.push(`[${taskId}] ${content.substring(0, 1500)}`);
     }
   }
 
-  if (priorParts.length === 0) return '';
-  return `Prior task outputs:\n${priorParts.join('\n')}`;
+  const parts = [];
+  if (goal) {
+    parts.push(`ORIGINAL USER GOAL:\n${goal}`);
+  }
+  if (priorParts.length > 0) {
+    parts.push(`PRIOR TASK OUTPUTS:\n${priorParts.join('\n')}`);
+  }
+
+  return parts.join('\n\n');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -185,9 +192,17 @@ function createAIHandler(aiType) {
     async execute(task, executionContext) {
       const contextStr = buildContextString(executionContext, task);
 
+      // Combine the original workflow goal with the specific task description.
+      // This ensures generators receive FULL intent, not just a 5-word task title.
+      const workflowGoal   = executionContext?.goal ?? '';
+      const taskDescription = task.description || task.title || '';
+      const combinedGoal = workflowGoal
+        ? `${workflowGoal}\n\nSPECIFIC TASK: ${taskDescription}`
+        : taskDescription;
+
       // Build params for Person 3's runTask()
       const params = {
-        goal: task.description || task.title,
+        goal: combinedGoal,
         context: contextStr,
       };
 
@@ -206,6 +221,9 @@ function createAIHandler(aiType) {
     },
   };
 }
+
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FACTORY — createAIHandlerRegistry()

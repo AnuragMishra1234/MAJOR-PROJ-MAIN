@@ -387,7 +387,7 @@ export default function ProfilePage({ onNavigate }) {
                 className="w-full bg-[#0A0A0A] border-b-2 border-[#D4AF37] py-2.5 px-3 font-mono text-xs text-[#F2F0E4] focus:outline-none focus:border-[#F2E8C4] rounded-none"
               >
                 <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (High-Speed Production Default)</option>
-                <option value="qwen/qwen3.6-27b">qwen/qwen3.6-27b (Deep Reasoning & Complex Planning)</option>
+                <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b (Deep Reasoning & Complex Planning)</option>
                 <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Multi-task Versatile)</option>
                 <option value="groq/compound-mini">groq/compound-mini (Compound Specialized)</option>
               </select>

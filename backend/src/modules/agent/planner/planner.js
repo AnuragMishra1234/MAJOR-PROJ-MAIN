@@ -319,7 +319,7 @@ export function loadPlanIntoEngine(plan, engine) {
         title: task.title,
         description: task.description,
         dependencies: task.dependencies ?? [],
-        metadata: task.metadata ?? {},
+        metadata: { ...(task.metadata ?? {}), goal: plan.goal },
       });
       taskIds.push(id);
     }

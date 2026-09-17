@@ -71,7 +71,7 @@ export class GroqProvider {
 
   constructor() {
     this.#apiKey = process.env.GROQ_API_KEY ?? '';
-    this.#model = process.env.PLANNER_MODEL ?? 'qwen/qwen3.6-27b';
+    this.#model = process.env.PLANNER_MODEL ?? 'openai/gpt-oss-20b';
     this.#baseUrl = 'https://api.groq.com/openai/v1';
   }
 

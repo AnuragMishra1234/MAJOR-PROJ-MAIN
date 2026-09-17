@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file agent.js
  * @module agent
  *
@@ -369,7 +369,7 @@ class Agent {
               memory.setContext(`heal_${task.id}_${taskRetryCounts[task.id]}`, healResult.meta);
               const retryExec = await this.#executionEngine.execute(task, healResult.repairedOutput);
               if (retryExec.success) {
-                const retryValid = this.#validationEngine.validate(task, retryExec);
+                const retryValid = this.#validationEngine.validate(task, retryExec, executionContext);
                 if (retryValid.valid) {
                   log(`[HEAL] Post-heal PASSED for ${task.id}`);
                   this.#emit(AgentEvent.HEAL_SUCCESS, { taskId: task.id, retryCount: taskRetryCounts[task.id], model: healResult.meta?.model });
@@ -412,8 +412,8 @@ class Agent {
           }
           // Not yet workflow-failed -- continue loop
         } else {
-          // â”€â”€ Phase 6: Validation Engine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          const validResult = this.#validationEngine.validate(task, execResult);
+          // ── Phase 6: Validation Engine ──────────────────────────────────────────
+          const validResult = this.#validationEngine.validate(task, execResult, executionContext);
 
           if (!validResult.valid) {
             log(`Validation failed: ${task.id}`, validResult.errors?.[0]);
@@ -435,7 +435,7 @@ class Agent {
                 memory.setContext(`heal_val_${task.id}_${taskRetryCounts[task.id]}`, healResult2.meta);
                 const retryExec2 = await this.#executionEngine.execute(task, healResult2.repairedOutput);
                 if (retryExec2.success) {
-                  const retryValid2 = this.#validationEngine.validate(task, retryExec2);
+                  const retryValid2 = this.#validationEngine.validate(task, retryExec2, executionContext);
                   if (retryValid2.valid) {
                     log(`[HEAL] Post-heal validation PASSED for ${task.id}`);
                     this.#emit(AgentEvent.HEAL_SUCCESS, { taskId: task.id, retryCount: taskRetryCounts[task.id], model: healResult2.meta?.model });

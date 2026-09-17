@@ -111,9 +111,12 @@ describe('5. executeAITask — unknown task type returns failure', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('6. buildContextString — empty context', () => {
-  it('returns empty string when no outputs exist', () => {
+  it('includes goal even when no prior outputs exist', () => {
+    // buildContextString now intentionally includes the original user goal
+    // so generators always have full user intent, even on the first task.
     const ctx = buildContextString({ outputs: {}, goal: 'Do something' }, { type: TaskType.TEXT_GENERATION });
-    expect(ctx).toBe('');
+    expect(ctx).toContain('Do something');
+    expect(ctx).toContain('ORIGINAL USER GOAL');
   });
 
   it('returns empty string for null context', () => {
@@ -121,7 +124,6 @@ describe('6. buildContextString — empty context', () => {
     expect(ctx).toBe('');
   });
 });
-
 // ─────────────────────────────────────────────────────────────────────────────
 // 7. buildContextString — extracts content from prior outputs
 // ─────────────────────────────────────────────────────────────────────────────
@@ -165,15 +167,17 @@ describe('7. buildContextString — extracts prior output content', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('8. buildContextString — truncation', () => {
-  it('truncates very long prior content to 400 chars', () => {
-    const longContent = 'A'.repeat(1000);
+  it('truncates very long prior content to 1500 chars', () => {
+    // The truncation limit was intentionally raised from 400 to 1500 chars
+    // so that planning specs / prior outputs are not cut off prematurely.
+    const longContent = 'A'.repeat(2000); // 2000 chars — above the 1500 limit
     const ctx = buildContextString({
       outputs: { 'task-1': { content: longContent } },
       goal: 'test',
     }, { type: TaskType.TEXT_GENERATION });
-    // The output should be truncated — raw longContent (1000 chars) should not appear fully
+    // The output should be truncated — raw longContent (2000 chars) should not appear fully
     expect(ctx).not.toContain(longContent);
-    expect(ctx.length).toBeLessThan(longContent.length + 100);
+    expect(ctx.length).toBeLessThan(longContent.length + 200);
   });
 });
 

@@ -360,26 +360,61 @@ function HealingBadge({ healed }) {
 }
 
 // ─── Real-mode Running Panel ──────────────────────────────────────────────────
-function RunningStatePanel({ goal }) {
-  const stages = ['Analyzing goal…', 'Planning tasks…', 'Generating with AI…', 'Executing output…', 'Validating results…'];
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setIdx((i) => Math.min(i + 1, stages.length - 1)), 5000);
-    return () => clearInterval(t);
-  }, []);
+/**
+ * Maps SSE event types to a stage index so we can display real pipeline progress.
+ * Stages are ordered: planning → first task → generating → executing → validating
+ */
+const STAGE_LABELS = [
+  'Analyzing goal…',
+  'Planning tasks…',
+  'Generating with AI…',
+  'Executing output…',
+  'Validating results…',
+];
+
+function sseEventToStageIndex(lastEvent) {
+  if (!lastEvent) return 0;
+  switch (lastEvent.type) {
+    case 'planning':      return 1;
+    case 'task_start':    return 2;
+    case 'task_complete': return 3;
+    case 'heal_start':    return 3;
+    case 'heal_success':  return 3;
+    case 'task_fail':     return 3;
+    case 'workflow_complete':
+    case 'workflow_fail': return 4;
+    default:              return 0;
+  }
+}
+
+function RunningStatePanel({ goal, lastEvent }) {
+  const idx = sseEventToStageIndex(lastEvent);
+  const taskLabel = lastEvent?.type === 'task_start' && lastEvent?.taskTitle
+    ? ` "${lastEvent.taskTitle}"`
+    : '';
+
   return (
     <div className="space-y-4">
       <p className="font-sans text-xs text-[#888888] italic border-l-2 border-[#D4AF37]/30 pl-3">"{goal}"</p>
       <div className="space-y-2">
-        {stages.map((stage, i) => (
-          <div key={stage} className="flex items-center gap-3">
-            {i < idx ? <CheckCircle size={12} className="text-[#4CAF50] shrink-0" /> :
-             i === idx ? <Loader size={12} className="text-[#D4AF37] animate-spin shrink-0" /> :
-             <div className="w-3 h-3 border border-[#444444] shrink-0" />}
-            <span className={`font-sans text-[11px] ${i < idx ? 'text-[#4CAF50]' : i === idx ? 'text-[#D4AF37]' : 'text-[#888888]/40'}`}>{stage}</span>
-          </div>
-        ))}
+        {STAGE_LABELS.map((stage, i) => {
+          const label = (i === 2 && taskLabel) ? `Generating${taskLabel}…` : stage;
+          return (
+            <div key={stage} className="flex items-center gap-3">
+              {i < idx ? <CheckCircle size={12} className="text-[#4CAF50] shrink-0" /> :
+               i === idx ? <Loader size={12} className="text-[#D4AF37] animate-spin shrink-0" /> :
+               <div className="w-3 h-3 border border-[#444444] shrink-0" />}
+              <span className={`font-sans text-[11px] ${i < idx ? 'text-[#4CAF50]' : i === idx ? 'text-[#D4AF37]' : 'text-[#888888]/40'}`}>{label}</span>
+            </div>
+          );
+        })}
       </div>
+      {lastEvent?.type === 'heal_start' && (
+        <div className="flex items-center gap-2 bg-[#FF9800]/10 border border-[#FF9800]/30 px-3 py-2 mt-2">
+          <Zap size={11} className="text-[#FF9800] shrink-0 animate-pulse" />
+          <span className="font-sans text-[9px] tracking-[0.2em] uppercase text-[#FF9800]">Auto-Healing in progress…</span>
+        </div>
+      )}
       <p className="font-sans text-[10px] text-[#888888]/50 tracking-wide pt-2">This may take up to 30 seconds.</p>
     </div>
   );
@@ -561,7 +596,7 @@ export default function WorkspacePage({ onNavigate, navState = {} }) {
   const [currentProjectId, setCurrentProjectId] = useState(initialProjectId || null);
   const [goal, setGoal]                         = useState(initialGoal || '');
 
-  const { workflow, tasks, isRunning, isComplete, isFailed, selectedTask, selectTask, startWorkflow, cancelWorkflow, loading, error } = useWorkflow();
+  const { workflow, tasks, isRunning, isComplete, isFailed, selectedTask, selectTask, startWorkflow, cancelWorkflow, loading, error, lastEvent } = useWorkflow();
 
   const agentStatus = useMemo(() => {
     if (loading)    return 'RUNNING';
@@ -761,7 +796,7 @@ export default function WorkspacePage({ onNavigate, navState = {} }) {
               {!workflow && !loading ? (
                 <p className="font-sans text-xs text-[#888888] italic">Enter a goal and start the workflow to activate the agent.</p>
               ) : loading && !USE_MOCK ? (
-                <RunningStatePanel goal={goal} />
+                <RunningStatePanel goal={goal} lastEvent={lastEvent} />
               ) : loading ? (
                 <div className="flex items-center gap-3">
                   <Loader size={14} className="text-[#D4AF37] animate-spin" />

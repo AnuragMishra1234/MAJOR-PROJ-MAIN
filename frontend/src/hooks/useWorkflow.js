@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file useWorkflow.js
  * @module hooks
  *
@@ -24,6 +24,7 @@ export function useWorkflow() {
   const [selectedTaskId,  setSelectedTaskId] = useState(null);
   const [loading,         setLoading]        = useState(false);
   const [error,           setError]          = useState(null);
+  const [lastEvent,       setLastEvent]      = useState(null); // { type, data, taskTitle? }
   const pollRef = useRef(null);
 
   const stopPolling = useCallback(() => {
@@ -41,6 +42,9 @@ export function useWorkflow() {
   }, []);
 
   const handleSSEEvent = useCallback((type, data) => {
+    // Track the last real event for real-time progress display
+    setLastEvent({ type, data, taskTitle: data?.title || data?.taskId || null });
+
     switch (type) {
       case 'planning':
         setWorkflow(prev => prev ? { ...prev, status: WorkflowStatus.RUNNING } : prev);
@@ -219,6 +223,6 @@ export function useWorkflow() {
     workflow, tasks, isRunning, isComplete, isFailed, isHealing,
     selectedTask, selectTask: setSelectedTaskId,
     startWorkflow, cancelWorkflow,
-    healingEvents, loading, error,
+    healingEvents, loading, error, lastEvent,
   };
 }
